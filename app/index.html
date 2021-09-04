@@ -51,10 +51,50 @@
       </div>
       <div id="queue" class="container">
         <h2 class="title">NA FILA</h2>
-        <div class="item-list-container"></div>
+        <div class="item-list-container">
+          <div class="song-item queue-layout">
+            <img class="song-logo" src="../assets/example_thumb.png" alt="thumb" draggable="false"/>
+            <div class="song-info">
+              <h3>MUSICA 01</h3>
+              <p>AUTOR X</p>
+            </div>
+            <button class="remove-button">
+              <img src="../assets/icons/xicon.svg" alt="share" draggable="false"/>
+            </button>
+          </div>
+        </div>
       </div>
-      <div id="music-indicator"></div>
-      <div id="music-player-container" class="container"></div>
+      <div id="music-indicator">
+        <img class="song-logo" src="../assets/example_thumb.png" alt="thumb" draggable="false"/>
+        <div class="song-info">
+          <h3>MUSICA 01</h3>
+          <p>AUTOR X</p>
+        </div>
+        <button class="share-button">
+          <img src="../assets/icons/share.svg" alt="share" draggable="false"/>
+        </button>
+      </div>
+      <div id="music-player-container" class="container">
+        <div class="controls">
+          <button id="previous-button">
+            <img src="../assets/icons/skip-previous.svg" alt="previous" draggable="false"/>
+          </button>
+          <button id="play-button">
+            <img src="../assets/icons/play.svg" alt="play" draggable="false"/>
+          </button>
+          <button id="next-button">
+            <img src="../assets/icons/skip-next.svg" alt="next" draggable="false"/>
+          </button>
+          <button id="volume-button">
+            <img src="../assets/icons/sound_high.svg" alt="next" draggable="false"/>
+          </button>
+        </div>
+        <div id="time">
+          <span id="time-passed">0:27</span>
+          <span id="time-total">3:38</span>
+        </div>
+        <input id="progress-bar" min="0" max="100" value="50" type="range"/>
+      </div>
     </div>
   </div>
   <script src="./index.js"></script>
