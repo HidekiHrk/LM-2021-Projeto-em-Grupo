@@ -92,7 +92,16 @@ form#search-field {
   align-items: center;
 }
 
-form#search-field img {
+form#search-field button[type="submit"] {
+  height: 31px;
+  width: 31px;
+  border: none;
+  background: none;
+  outline: none;
+  cursor: pointer;
+}
+
+form#search-field button[type="submit"] img {
   height: 31px;
   width: 31px;
 }
@@ -197,8 +206,9 @@ div.item-list-container {
   justify-content: flex-start;
   top: 68px;
   left: 24px;
-  width: calc(100% - 48px);
+  width: calc(100% - 38px);
   height: calc(100% - 68px - 24px);
+  padding-right: 10px;
 }
 
 div.item-list-container::-webkit-scrollbar {
@@ -322,10 +332,11 @@ div#music-indicator {
 }
 
 div#music-indicator img.song-logo {
-  height: 100%;
-  width: auto;
-  object-fit: contain;
+  height: 123px;
+  width: 123px;
+  object-fit: cover;
   border: 1px solid var(--color-light-purple);
+  background-color: var(--color-light-purple);
 }
 
 div#music-indicator div.song-info {
@@ -445,4 +456,8 @@ input#progress-bar::-webkit-slider-thumb {
   width: 6px;
   background-color: var(--color-light-gray);
   border-radius: 5px;
+}
+
+audio#audio-controller {
+  display: none;
 }

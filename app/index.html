@@ -16,8 +16,10 @@
         <span>SOUNDCAVE</span>
       </div>
       <form id="search-field">
-        <img src="../assets/icons/search.svg" alt="search" draggable="false"/>
-        <input class="container" type="text" placeholder="Pesquisar música"/>
+        <button type="submit">
+          <img src="../assets/icons/search.svg" alt="search" draggable="false"/>
+        </button>
+        <input name="search-text" class="container" type="text" placeholder="Pesquisar música"/>
       </form>
       <div id="menu">
         <div id="menu-container">
@@ -97,6 +99,7 @@
       </div>
     </div>
   </div>
+  <audio id="audio-controller" ></audio>
   <script src="./index.js"></script>
 </body>
 </html>
