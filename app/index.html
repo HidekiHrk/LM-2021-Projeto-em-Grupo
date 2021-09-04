@@ -89,13 +89,16 @@
           </button>
           <button id="volume-button">
             <img src="../assets/icons/sound_high.svg" alt="next" draggable="false"/>
+            <div class="volume-controller container">
+              <input type="range" min="0" max="100" value="100"/>
+            </div>
           </button>
         </div>
         <div id="time">
-          <span id="time-passed">0:27</span>
-          <span id="time-total">3:38</span>
+          <span id="time-passed">0:00</span>
+          <span id="time-total">0:00</span>
         </div>
-        <input id="progress-bar" min="0" max="100" value="50" type="range"/>
+        <input id="progress-bar" min="0" max="100" value="0" type="range"/>
       </div>
     </div>
   </div>

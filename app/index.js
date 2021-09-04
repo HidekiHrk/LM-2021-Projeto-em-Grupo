@@ -51,6 +51,7 @@ class Queue {
     const current = this.getCurrent();
     this._history.splice(this._history.length - 1);
     this._songs.splice(0, 0, current);
+    this._triggerObservers("update", this);
     this._triggerObservers("newCurrent", this);
   }
 
@@ -236,6 +237,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Controls
   const playButton = document.getElementById("play-button");
+  const previousButton = document.getElementById("previous-button");
+  const nextButton = document.getElementById("next-button");
+  const volumeButton = document.getElementById("volume-button");
+  const volumeBar = volumeButton.querySelector(
+    "div.volume-controller input[type='range']"
+  );
+  const volumeImgButton = volumeButton.querySelector("img");
 
   const queueRoot = document.querySelector("div#queue div.item-list-container");
 
@@ -245,6 +253,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setTime(0, 0, timeRootElement);
 
   setProgress(progressBar, progressBar.value);
+
   progressBar.addEventListener("input", (e) => {
     const value = e.target.value;
     setProgress(e.target, value);
@@ -253,7 +262,20 @@ document.addEventListener("DOMContentLoaded", () => {
         parseFloat(value),
         audioController.duration
       );
+      setTime(
+        Math.round(audioController.currentTime),
+        Math.round(audioController.duration),
+        timeRootElement
+      );
     }
+  });
+
+  volumeBar.addEventListener("input", (e) => {
+    const value = e.target.value;
+    setProgress(e.target, value);
+
+    audioController.muted = false;
+    audioController.volume = parseFloat(value) / 100;
   });
 
   searchForm.addEventListener("submit", (e) => {
@@ -309,16 +331,48 @@ document.addEventListener("DOMContentLoaded", () => {
       .setAttribute("src", "../assets/icons/play.svg");
   };
 
+  audioController.onvolumechange = (e) => {
+    const volume = e.target.volume * 100;
+    let iconName = "";
+    if (e.target.muted) {
+      iconName = "muted";
+    } else if (volume >= 75) {
+      iconName = "high";
+    } else if (volume >= 25) {
+      iconName = "low";
+    } else {
+      iconName = "none";
+    }
+    volumeImgButton.setAttribute(
+      "src",
+      `../assets/icons/sound_${iconName}.svg`
+    );
+  };
+
   playButton.addEventListener("click", () => {
-    if (audioController.paused) {
+    if (audioController.ended) {
+      queue.pull();
+    } else if (audioController.paused) {
       audioController.play();
     } else {
       audioController.pause();
     }
   });
 
+  previousButton.addEventListener("click", () => {
+    queue.pullPrevious();
+  });
+
+  nextButton.addEventListener("click", () => {
+    queue.pull();
+  });
+
+  volumeImgButton.addEventListener("click", () => {
+    audioController.muted = !audioController.muted;
+  });
+
   setInterval(() => {
-    if (!audioController.paused && !!audioController.currentSrc) {
+    if (!audioController.paused && audioController.currentSrc) {
       setTime(
         Math.round(audioController.currentTime),
         Math.round(audioController.duration),

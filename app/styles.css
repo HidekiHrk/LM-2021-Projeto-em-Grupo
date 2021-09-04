@@ -420,6 +420,91 @@ div#music-player-container div.controls button#volume-button {
   right: 0;
   top: 50%;
   transform: translateY(-50%);
+  cursor: default;
+}
+
+div#music-player-container div.controls button#volume-button img {
+  cursor: pointer;
+}
+
+div#music-player-container
+  div.controls
+  button#volume-button
+  div.volume-controller {
+  top: -3px;
+  left: calc(100% + 10px);
+  position: absolute;
+  display: none;
+  height: 32px;
+  width: 120px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+}
+
+div#music-player-container
+  div.controls
+  button#volume-button:hover
+  div.volume-controller {
+  display: flex;
+}
+
+div#music-player-container
+  div.controls
+  button#volume-button:hover
+  div.volume-controller::after {
+  position: absolute;
+  display: block;
+  content: "";
+  width: 10px;
+  height: 100%;
+  top: 0;
+  left: -10px;
+}
+
+div#music-player-container
+  div.controls
+  button#volume-button
+  div.volume-controller
+  input[type="range"] {
+  /* transform: rotate(270deg); */
+  width: 90px;
+  border-radius: 5px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  background: linear-gradient(
+    to right,
+    var(--color-light-gray) 100%,
+    var(--color-block-border) 100%
+  );
+}
+
+div#music-player-container
+  div.controls
+  button#volume-button
+  div.volume-controller
+  input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  width: 6px;
+  background-color: var(--color-light-gray);
+  border-radius: 5px;
+}
+
+div#music-player-container
+  div.controls
+  button#volume-button
+  div.volume-controller
+  input[type="range"]::-moz-range-thumb {
+  -moz-appearance: none;
+  appearance: none;
+  height: 6px;
+  width: 6px;
+  background-color: var(--color-light-gray);
+  border: none;
+  border-radius: 5px;
 }
 
 div#time {
@@ -440,6 +525,7 @@ input#progress-bar {
   margin-top: 6px;
   height: 6px;
   -webkit-appearance: none;
+  -moz-appearance: none;
   background: linear-gradient(
     to right,
     var(--color-light-gray) 0%,
@@ -455,6 +541,16 @@ input#progress-bar::-webkit-slider-thumb {
   height: 6px;
   width: 6px;
   background-color: var(--color-light-gray);
+  border-radius: 5px;
+}
+
+input#progress-bar::-moz-range-thumb {
+  -moz-appearance: none;
+  appearance: none;
+  height: 6px;
+  width: 6px;
+  background-color: var(--color-light-gray);
+  border: none;
   border-radius: 5px;
 }
 
