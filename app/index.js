@@ -368,7 +368,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   volumeImgButton.addEventListener("click", () => {
-    audioController.muted = !audioController.muted;
+    if (window.innerWidth >= 700) {
+      audioController.muted = !audioController.muted;
+    }
   });
 
   setInterval(() => {
@@ -383,6 +385,11 @@ document.addEventListener("DOMContentLoaded", () => {
         audioController.duration
       );
       setProgress(progressBar, progressBar.value);
+      if (musicIndicator.className === "") {
+        musicIndicator.className = "active-music";
+      }
+    } else {
+      musicIndicator.className = "";
     }
   }, 1000);
 });
