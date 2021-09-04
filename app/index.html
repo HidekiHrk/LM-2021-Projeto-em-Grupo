@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SoundCave</title>
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="shortcut icon" href="../assets/icons/favicon.png" type="image/x-icon">
+</head>
+<body>
+  <div id="main-div">
+    <div class="navbar">
+      <div class="logo">
+        <img src="../assets/logo.svg" alt="logo" draggable="false"/>
+        <span>SOUNDCAVE</span>
+      </div>
+      <form id="search-field">
+        <img src="../assets/icons/search.svg" alt="search" draggable="false"/>
+        <input class="container" type="text" placeholder="Pesquisar música"/>
+      </form>
+      <div id="menu">
+        <div id="menu-container">
+          <button id="menu-toggler">
+            <img src="../assets/icons/sandwich.svg" alt="menu toggler" draggable="false"/>
+          </button>
+          <ul id="menu-body" class="container">
+            <li>Opções</li>
+            <li>GitHub</li>
+            <li>Créditos</li>
+            <li>Secret</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="content-grid">
+      <div id="search-results" class="container">
+        <h2 class="title">INÍCIO</h2>
+        <div class="item-list-container">
+          <div class="song-item">
+            <img class="song-logo" src="../assets/example_thumb.png" alt="thumb" draggable="false"/>
+            <div class="song-info">
+              <h3>MUSICA 01</h3>
+              <p>AUTOR X</p>
+            </div>
+            <button class="share-button">
+              <img src="../assets/icons/share.svg" alt="share" draggable="false"/>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div id="queue" class="container">
+        <h2 class="title">NA FILA</h2>
+        <div class="item-list-container"></div>
+      </div>
+      <div id="music-indicator"></div>
+      <div id="music-player-container" class="container"></div>
+    </div>
+  </div>
+  <script src="./index.js"></script>
+</body>
+</html>
