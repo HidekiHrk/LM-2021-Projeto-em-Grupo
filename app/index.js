@@ -495,10 +495,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const typedText = data.get("search-text");
     if (typedText === "") {
       searchResultsTitle.innerText = "INÍCIO";
-      renderSongs(
-        Object.keys(songManager.songList),
-        searchResultsRoot
-      );
+      renderSongs(Object.keys(songManager.songList), searchResultsRoot);
     } else {
       searchResultsTitle.innerText = "RESULTADOS DA PESQUISA";
       const textToSearch = typedText.toLowerCase();
@@ -510,8 +507,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   queue.on("update", (q) => {
-    
-    Songs(q.getSongs(), queueRoot, true);
+    renderSongs(q.getSongs(), queueRoot, true);
     const current = q.getCurrent();
     if (current === undefined && q.getSongs().length > 0) {
       q.pull();
