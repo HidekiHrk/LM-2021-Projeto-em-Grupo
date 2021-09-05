@@ -133,10 +133,6 @@ function createNotification(
     <span class="description">${description}</span>
   `;
 
-  // const removeButton = notificationElement.querySelector(
-  //   "button.remove-button"
-  // );
-
   const remove = () => {
     notificationElement.setAttribute("active", false);
     setTimeout(() => {

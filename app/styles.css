@@ -381,7 +381,7 @@ div#music-indicator img.song-logo {
   width: 123px;
   object-fit: cover;
   border: 1px solid var(--color-light-purple);
-  background-color: var(--color-light-purple);
+  background-color: var(--color-block-bg);
 }
 
 div#music-indicator div.song-info {
