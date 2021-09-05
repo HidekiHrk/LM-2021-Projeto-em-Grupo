@@ -29,19 +29,19 @@ class Queue {
 
   push(songId) {
     this._songs.push(songId);
-    this._triggerObservers("update", this);
+    this._triggerObservers(["update"], this);
   }
 
   pull() {
     const lastSong = this._songs.splice(0, 1)[0];
     if (lastSong !== undefined) {
       this._history.push(lastSong);
-      this._triggerObservers("newCurrent", this);
+      this._triggerObservers(["newCurrent"], this);
       if (this._history.length >= 10) {
         this.trimHistory();
       }
     }
-    this._triggerObservers("update", this);
+    this._triggerObservers(["update"], this);
     return lastSong;
   }
 
@@ -51,13 +51,19 @@ class Queue {
     const current = this.getCurrent();
     this._history.splice(this._history.length - 1);
     this._songs.splice(0, 0, current);
-    this._triggerObservers("update", this);
-    this._triggerObservers("newCurrent", this);
+    this._triggerObservers(["update", "newCurrent"], this);
+  }
+
+  playSong(id) {
+    if (id !== this.getCurrent()) {
+      this._history.push(id);
+    }
+    this._triggerObservers(["update", "newCurrent"], this);
   }
 
   remove(index) {
     this._songs.splice(index, 1);
-    this._triggerObservers("update", this);
+    this._triggerObservers(["update"], this);
   }
 
   getCurrent() {
@@ -84,10 +90,12 @@ class Queue {
     this._observers[event].push(callback);
   }
 
-  _triggerObservers(event, ...args) {
-    this._observers[event].forEach(async (callback) => {
-      callback(...args);
-    });
+  _triggerObservers(events = [], ...args) {
+    for (const event of events) {
+      this._observers[event].forEach(async (callback) => {
+        callback(...args);
+      });
+    }
   }
 }
 
@@ -102,7 +110,7 @@ function checkArrayEquality(array1 = [], array2 = []) {
 }
 
 function setProgress(element, value) {
-  element.style.background = `linear-gradient(to right, var(--color-light-gray) ${value}%, var(--color-block-border) ${value}%)`;
+  element.style.background = `linear-gradient(to right, var(--color-progress-bar) ${value}%, var(--color-block-border) ${value}%)`;
 }
 
 function createSongElement(songId) {
@@ -121,12 +129,29 @@ function createSongElement(songId) {
       <h3>${songObject.title}</h3>
       <p>${songObject.author}</p>
     </div>
+    <div class="interaction-buttons">
+      <button class="play-now-button">
+        <img src="../assets/icons/play_now.svg" alt="share" draggable="false"/>
+      </button>
+      <button class="add-to-queue-button">
+        <img src="../assets/icons/plus.svg" alt="share" draggable="false"/>
+      </button>
+    </div>
     <button class="share-button">
       <img src="../assets/icons/share.svg" alt="share" draggable="false" />
     </button>
   `;
 
-  songElement.addEventListener("click", () => {
+  const playNowButton = songElement.querySelector("button.play-now-button");
+  const addToQueueButton = songElement.querySelector(
+    "button.add-to-queue-button"
+  );
+
+  playNowButton.addEventListener("click", () => {
+    queue.playSong(songId);
+  });
+
+  addToQueueButton.addEventListener("click", () => {
     queue.push(songId);
   });
 
@@ -222,12 +247,26 @@ function getFromPercent(percent, total) {
   return (percent / 100) * total;
 }
 
+function switchDisable(elements = [], disable = false) {
+  elements.forEach((element) => {
+    const isDisabled = element.getAttribute("disabled");
+    if (disable && !isDisabled) {
+      element.setAttribute("disabled", disable);
+    } else if (!disable && isDisabled) {
+      element.removeAttribute("disabled");
+    }
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const audioController = document.getElementById("audio-controller");
   const progressBar = document.getElementById("progress-bar");
   const searchForm = document.getElementById("search-field");
   const musicIndicator = document.getElementById("music-indicator");
   const timeRootElement = document.getElementById("time");
+  const shareButton = document.querySelector(
+    "div#music-indicator button.share-button"
+  );
   const searchResultsTitle = document.querySelector(
     "div#search-results h2.title"
   );
@@ -351,7 +390,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   playButton.addEventListener("click", () => {
     if (audioController.ended) {
-      queue.pull();
+      if (queue.getSongs().length > 0) {
+        queue.pull();
+      } else {
+        audioController.currentTime = 0;
+      }
     } else if (audioController.paused) {
       audioController.play();
     } else {
@@ -385,11 +428,22 @@ document.addEventListener("DOMContentLoaded", () => {
         audioController.duration
       );
       setProgress(progressBar, progressBar.value);
-      if (musicIndicator.className === "") {
-        musicIndicator.className = "active-music";
-      }
-    } else {
-      musicIndicator.className = "";
     }
-  }, 1000);
+    switchDisable(
+      [
+        playButton,
+        nextButton,
+        previousButton,
+        volumeButton,
+        progressBar,
+        shareButton,
+      ],
+      !audioController.currentSrc
+    );
+
+    musicIndicator.className =
+      audioController.currentSrc && !audioController.ended
+        ? "active-music"
+        : "";
+  }, 500);
 });
