@@ -1,35 +1,37 @@
-// const CDN_URL = "https://soundcave-cdn.netlify.app";
+const CDN_URL = "https://soundcave-cdn.netlify.app";
 
-const SONG_LIST = {
+const DEFAULT_SONG_PATH = "./musics";
+
+const DEFAULT_SONG_LIST = {
   0: {
     title: "On & On",
     author: "Cartoon (feat. Daniel Levi)",
-    path: `./musics/cartoon_on_on`,
+    path: `cartoon_on_on`,
   },
   1: {
     title: "Why We Lose ",
     author: "Cartoon (feat. Coleman Trapp)",
-    path: `./musics/cartoon_why_we_lose`,
+    path: `cartoon_why_we_lose`,
   },
   2: {
     title: "Zero Gravity",
     author: "Jauque X, Tom Wilson",
-    path: `./musics/zero_gravity`,
+    path: `zero_gravity`,
   },
   3: {
     title: "Fly",
     author: "Fransis Derelle (feat. Parker Polhill)",
-    path: `./musics/fly`,
+    path: `fly`,
   },
   4: {
     title: "Collins Ave.",
     author: "Umpire",
-    path: `./musics/collins_ave`,
+    path: `collins_ave`,
   },
   5: {
     title: "Flares",
     author: "NIVIRO",
-    path: `./musics/flares`,
+    path: `flares`,
   },
 };
 
@@ -43,6 +45,52 @@ const notificationManager = {
   createNotification: ({ title, description }, timeout) => {},
   timeout: 3,
 };
+
+class SongManager {
+  constructor(cdnUrl) {
+    this.__SONG_LIST = {};
+    this.cdnURL = cdnUrl;
+    this.fetchFailure = false;
+  }
+
+  get songList() {
+    if (this.fetchFailure) {
+      return DEFAULT_SONG_LIST;
+    }
+    return this.__SONG_LIST;
+  }
+
+  getSong(id) {
+    const songObject = this.songList[id];
+    if (songObject !== undefined) {
+      const newSongObject = {
+        title: songObject.title,
+        author: songObject.author,
+        path: `${!this.fetchFailure ? this.cdnURL : DEFAULT_SONG_PATH}/${
+          songObject.path
+        }`,
+      };
+      return newSongObject;
+    }
+    return;
+  }
+
+  hasSong(id) {
+    return Object.prototype.hasOwnProperty.call(this.__SONG_LIST, id);
+  }
+
+  async fetchSongsFromCdn() {
+    try {
+      const newSongList = await fetch(`${this.cdnURL}/songs.json`);
+      const response = await newSongList.json();
+      this.__SONG_LIST = response;
+      this.fetchFailure = false;
+    } catch (e) {
+      this.fetchFailure = true;
+      this.__SONG_LIST = { ...DEFAULT_SONG_LIST };
+    }
+  }
+}
 
 class Queue {
   constructor() {
@@ -127,6 +175,7 @@ class Queue {
 }
 
 const queue = new Queue();
+const songManager = new SongManager(CDN_URL);
 
 function checkArrayEquality(array1 = [], array2 = []) {
   if (array1.length !== array2.length) return false;
@@ -180,7 +229,7 @@ function createNotification(
 }
 
 function createSongElement(songId) {
-  const songObject = SONG_LIST[songId];
+  const songObject = songManager.getSong(songId);
   if (songObject === undefined) return;
   const songElement = document.createElement("div");
   songElement.className = "song-item";
@@ -235,7 +284,7 @@ function createSongElement(songId) {
 }
 
 function createQueueSongElement(songId, queuePosition) {
-  const songObject = SONG_LIST[songId];
+  const songObject = songManager.getSong(songId);
   if (songObject === undefined) return;
   const songElement = document.createElement("div");
   songElement.className = "song-item queue-layout";
@@ -264,14 +313,15 @@ function createQueueSongElement(songId, queuePosition) {
   return songElement;
 }
 
-function renderSongs(ids = [], rootElement, isQueue = false) {
+function renderSongs(ids = [], rootElement, isQueue = false, limit = 0) {
   const cacheName = isQueue ? "queue" : "search";
   if (ids.length !== 0 && checkArrayEquality(ids, RENDER_CACHE[cacheName]))
     return;
 
   rootElement.innerHTML = "";
   const songList = document.createDocumentFragment();
-  for (let i = 0; i < ids.length; i++) {
+  const songLimit = limit !== 0 && limit < ids.length ? limit : ids.length;
+  for (let i = 0; i < songLimit; i++) {
     const id = ids[i];
     const songElement = isQueue
       ? createQueueSongElement(id, i)
@@ -345,7 +395,7 @@ function getSharedSong() {
   return searchParams.get("song");
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const sharedSong = getSharedSong();
   const notificationRoot = document.getElementById("notifications");
   const audioController = document.getElementById("audio-controller");
@@ -375,7 +425,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const queueRoot = document.querySelector("div#queue div.item-list-container");
 
-  renderSongs(Object.keys(SONG_LIST), searchResultsRoot);
+  switchDisable(
+    [
+      playButton,
+      nextButton,
+      previousButton,
+      volumeButton,
+      progressBar,
+      shareButton,
+    ],
+    true
+  );
+
+  await songManager.fetchSongsFromCdn();
+
+  renderSongs(Object.keys(songManager.songList), searchResultsRoot, false, 20);
   renderSongs([], queueRoot, true);
 
   setTime(0, 0, timeRootElement);
@@ -423,14 +487,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const typedText = data.get("search-text");
     if (typedText === "") {
       searchResultsTitle.innerText = "INÍCIO";
-      renderSongs(Object.keys(SONG_LIST), searchResultsRoot);
+      renderSongs(
+        Object.keys(songManager.songList),
+        searchResultsRoot,
+        false,
+        12
+      );
     } else {
       searchResultsTitle.innerText = "RESULTADOS DA PESQUISA";
       const textToSearch = typedText.toLowerCase();
-      const songsToRender = Object.entries(SONG_LIST)
+      const songsToRender = Object.entries(songManager.songList)
         .filter(([_, v]) => v.title.toLowerCase().includes(textToSearch))
         .map(([k]) => k);
-      renderSongs(songsToRender, searchResultsRoot);
+      renderSongs(songsToRender, searchResultsRoot, false, 20);
     }
   });
 
@@ -444,7 +513,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   queue.on("newCurrent", (q) => {
     const current = q.getCurrent();
-    const currentSong = SONG_LIST[current];
+    const currentSong = songManager.getSong(current);
     musicIndicator
       .querySelector("img.song-logo")
       .setAttribute("src", `${currentSong.path}/thumb.jpg`);
@@ -519,7 +588,7 @@ document.addEventListener("DOMContentLoaded", () => {
   shareButton.addEventListener("click", () => {
     const currentSongId = queue.getCurrent();
     if (currentSongId !== undefined) {
-      const songObject = SONG_LIST[currentSongId];
+      const songObject = songManager.getSong(currentSongId);
       const shareUrl = getShareUrl(currentSongId);
       navigator.clipboard.writeText(shareUrl);
       notificationManager.createNotification({
@@ -562,7 +631,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (
     sharedSong !== null &&
     !isNaN(sharedSong) &&
-    Object.prototype.hasOwnProperty.call(SONG_LIST, sharedSong)
+    songManager.hasSong(sharedSong)
   ) {
     queue.push(sharedSong);
   }
