@@ -446,7 +446,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   await songManager.fetchSongsFromCdn();
 
-  renderSongs(Object.keys(songManager.songList), searchResultsRoot, false, 20);
+  renderSongs(Object.keys(songManager.songList), searchResultsRoot);
   renderSongs([], queueRoot, true);
 
   setTime(0, 0, timeRootElement);
@@ -497,9 +497,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       searchResultsTitle.innerText = "INÍCIO";
       renderSongs(
         Object.keys(songManager.songList),
-        searchResultsRoot,
-        false,
-        12
+        searchResultsRoot
       );
     } else {
       searchResultsTitle.innerText = "RESULTADOS DA PESQUISA";
@@ -507,12 +505,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       const songsToRender = Object.entries(songManager.songList)
         .filter(([_, v]) => v.title.toLowerCase().includes(textToSearch))
         .map(([k]) => k);
-      renderSongs(songsToRender, searchResultsRoot, false, 20);
+      renderSongs(songsToRender, searchResultsRoot);
     }
   });
 
   queue.on("update", (q) => {
-    renderSongs(q.getSongs(), queueRoot, true);
+    
+    Songs(q.getSongs(), queueRoot, true);
     const current = q.getCurrent();
     if (current === undefined && q.getSongs().length > 0) {
       q.pull();
