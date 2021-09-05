@@ -17,6 +17,11 @@ const RENDER_CACHE = {
   lastCurrent: undefined,
 };
 
+const notificationManager = {
+  createNotification: ({ title, description }, timeout) => {},
+  timeout: 3,
+};
+
 class Queue {
   constructor() {
     this._songs = [];
@@ -113,6 +118,50 @@ function setProgress(element, value) {
   element.style.background = `linear-gradient(to right, var(--color-progress-bar) ${value}%, var(--color-block-border) ${value}%)`;
 }
 
+function createNotification(
+  { title, description },
+  notificationRoot,
+  timeout = 3
+) {
+  const notificationElement = document.createElement("div");
+  notificationElement.className = "notification container";
+  notificationElement.innerHTML = `
+    <button class="remove-button" active="false">
+      <img src="../assets/icons/xicon.svg" alt="share" draggable="false"/>
+    </button>
+    <span class="title">${title}</span>
+    <span class="description">${description}</span>
+  `;
+
+  // const removeButton = notificationElement.querySelector(
+  //   "button.remove-button"
+  // );
+
+  const remove = () => {
+    notificationElement.setAttribute("active", false);
+    setTimeout(() => {
+      notificationRoot.removeChild(notificationElement);
+    }, 300);
+  };
+
+  setTimeout(remove, 1000 * timeout);
+  notificationElement.addEventListener("click", remove);
+
+  notificationRoot.appendChild(notificationElement);
+
+  setTimeout(() => {
+    notificationElement.setAttribute("active", true);
+  }, 100);
+
+  console.log(notificationRoot.children.length);
+  if (notificationRoot.children.length > 5) {
+    const children = notificationRoot.children;
+    for (let i = 0; i < notificationRoot.children.length - 5; i++) {
+      notificationRoot.removeChild(children[i]);
+    }
+  }
+}
+
 function createSongElement(songId) {
   const songObject = SONG_LIST[songId];
   if (songObject === undefined) return;
@@ -159,6 +208,10 @@ function createSongElement(songId) {
   shareButton.addEventListener("click", () => {
     const shareUrl = getShareUrl(songId);
     navigator.clipboard.writeText(shareUrl);
+    notificationManager.createNotification({
+      title: "Copiado!",
+      description: `Você copiou o link da música <b>${songObject.title}</b> para compartilhar com os seus amigos!`,
+    });
   });
 
   return songElement;
@@ -277,6 +330,7 @@ function getSharedSong() {
 
 document.addEventListener("DOMContentLoaded", () => {
   const sharedSong = getSharedSong();
+  const notificationRoot = document.getElementById("notifications");
   const audioController = document.getElementById("audio-controller");
   const progressBar = document.getElementById("progress-bar");
   const searchForm = document.getElementById("search-field");
@@ -310,6 +364,17 @@ document.addEventListener("DOMContentLoaded", () => {
   setTime(0, 0, timeRootElement);
 
   setProgress(progressBar, progressBar.value);
+
+  notificationManager.createNotification = (
+    { title, description },
+    timeout
+  ) => {
+    createNotification(
+      { title, description },
+      notificationRoot,
+      timeout ?? notificationManager.timeout
+    );
+  };
 
   progressBar.addEventListener("input", (e) => {
     const value = e.target.value;
@@ -437,8 +502,13 @@ document.addEventListener("DOMContentLoaded", () => {
   shareButton.addEventListener("click", () => {
     const currentSongId = queue.getCurrent();
     if (currentSongId !== undefined) {
+      const songObject = SONG_LIST[currentSongId];
       const shareUrl = getShareUrl(currentSongId);
       navigator.clipboard.writeText(shareUrl);
+      notificationManager.createNotification({
+        title: "Copiado!",
+        description: `Você copiou o link da música <b>${songObject.title}</b> para compartilhar com os seus amigos!`,
+      });
     }
   });
 
