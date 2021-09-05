@@ -146,6 +146,7 @@ function createSongElement(songId) {
   const addToQueueButton = songElement.querySelector(
     "button.add-to-queue-button"
   );
+  const shareButton = songElement.querySelector("button.share-button");
 
   playNowButton.addEventListener("click", () => {
     queue.playSong(songId);
@@ -153,6 +154,11 @@ function createSongElement(songId) {
 
   addToQueueButton.addEventListener("click", () => {
     queue.push(songId);
+  });
+
+  shareButton.addEventListener("click", () => {
+    const shareUrl = getShareUrl(songId);
+    navigator.clipboard.writeText(shareUrl);
   });
 
   return songElement;
@@ -258,7 +264,19 @@ function switchDisable(elements = [], disable = false) {
   });
 }
 
+function getShareUrl(songId) {
+  const newSearchParams = new URLSearchParams([["song", songId]]);
+  const baseURL = window.location.origin + window.location.pathname;
+  return [baseURL, newSearchParams].join("?");
+}
+
+function getSharedSong() {
+  const searchParams = new URLSearchParams(window.location.search);
+  return searchParams.get("song");
+}
+
 document.addEventListener("DOMContentLoaded", () => {
+  const sharedSong = getSharedSong();
   const audioController = document.getElementById("audio-controller");
   const progressBar = document.getElementById("progress-bar");
   const searchForm = document.getElementById("search-field");
@@ -416,6 +434,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  shareButton.addEventListener("click", () => {
+    const currentSongId = queue.getCurrent();
+    if (currentSongId !== undefined) {
+      const shareUrl = getShareUrl(currentSongId);
+      navigator.clipboard.writeText(shareUrl);
+    }
+  });
+
   setInterval(() => {
     if (!audioController.paused && audioController.currentSrc) {
       setTime(
@@ -446,4 +472,12 @@ document.addEventListener("DOMContentLoaded", () => {
         ? "active-music"
         : "";
   }, 500);
+
+  if (
+    sharedSong !== null &&
+    !isNaN(sharedSong) &&
+    Object.prototype.hasOwnProperty.call(SONG_LIST, sharedSong)
+  ) {
+    queue.push(sharedSong);
+  }
 });
