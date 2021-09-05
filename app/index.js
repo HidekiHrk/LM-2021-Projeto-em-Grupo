@@ -1,13 +1,35 @@
+// const CDN_URL = "https://soundcave-cdn.netlify.app";
+
 const SONG_LIST = {
   0: {
     title: "On & On",
     author: "Cartoon (feat. Daniel Levi)",
-    path: "./musics/cartoon_on_on",
+    path: `./musics/cartoon_on_on`,
   },
   1: {
     title: "Why We Lose ",
     author: "Cartoon (feat. Coleman Trapp)",
-    path: "./musics/cartoon_why_we_lose",
+    path: `./musics/cartoon_why_we_lose`,
+  },
+  2: {
+    title: "Zero Gravity",
+    author: "Jauque X, Tom Wilson",
+    path: `./musics/zero_gravity`,
+  },
+  3: {
+    title: "Fly",
+    author: "Fransis Derelle (feat. Parker Polhill)",
+    path: `./musics/fly`,
+  },
+  4: {
+    title: "Collins Ave.",
+    author: "Umpire",
+    path: `./musics/collins_ave`,
+  },
+  5: {
+    title: "Flares",
+    author: "NIVIRO",
+    path: `./musics/flares`,
   },
 };
 
@@ -149,7 +171,6 @@ function createNotification(
     notificationElement.setAttribute("active", true);
   }, 100);
 
-  console.log(notificationRoot.children.length);
   if (notificationRoot.children.length > 5) {
     const children = notificationRoot.children;
     for (let i = 0; i < notificationRoot.children.length - 5; i++) {
@@ -512,13 +533,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!audioController.paused && audioController.currentSrc) {
       setTime(
         Math.round(audioController.currentTime),
-        Math.round(audioController.duration),
+        Math.round(audioController.duration || 0),
         timeRootElement
       );
-      progressBar.value = getPercent(
-        audioController.currentTime,
-        audioController.duration
-      );
+      progressBar.value = !isNaN(audioController.duration)
+        ? getPercent(audioController.currentTime, audioController?.duration)
+        : 0;
       setProgress(progressBar, progressBar.value);
     }
     switchDisable(
