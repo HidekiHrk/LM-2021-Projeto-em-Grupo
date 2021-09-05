@@ -17,6 +17,11 @@ const RENDER_CACHE = {
   lastCurrent: undefined,
 };
 
+const notificationManager = {
+  createNotification: ({ title, description }, timeout) => {},
+  timeout: 3,
+};
+
 class Queue {
   constructor() {
     this._songs = [];
@@ -29,19 +34,19 @@ class Queue {
 
   push(songId) {
     this._songs.push(songId);
-    this._triggerObservers("update", this);
+    this._triggerObservers(["update"], this);
   }
 
   pull() {
     const lastSong = this._songs.splice(0, 1)[0];
     if (lastSong !== undefined) {
       this._history.push(lastSong);
-      this._triggerObservers("newCurrent", this);
+      this._triggerObservers(["newCurrent"], this);
       if (this._history.length >= 10) {
         this.trimHistory();
       }
     }
-    this._triggerObservers("update", this);
+    this._triggerObservers(["update"], this);
     return lastSong;
   }
 
@@ -51,13 +56,19 @@ class Queue {
     const current = this.getCurrent();
     this._history.splice(this._history.length - 1);
     this._songs.splice(0, 0, current);
-    this._triggerObservers("update", this);
-    this._triggerObservers("newCurrent", this);
+    this._triggerObservers(["update", "newCurrent"], this);
+  }
+
+  playSong(id) {
+    if (id !== this.getCurrent()) {
+      this._history.push(id);
+    }
+    this._triggerObservers(["update", "newCurrent"], this);
   }
 
   remove(index) {
     this._songs.splice(index, 1);
-    this._triggerObservers("update", this);
+    this._triggerObservers(["update"], this);
   }
 
   getCurrent() {
@@ -84,10 +95,12 @@ class Queue {
     this._observers[event].push(callback);
   }
 
-  _triggerObservers(event, ...args) {
-    this._observers[event].forEach(async (callback) => {
-      callback(...args);
-    });
+  _triggerObservers(events = [], ...args) {
+    for (const event of events) {
+      this._observers[event].forEach(async (callback) => {
+        callback(...args);
+      });
+    }
   }
 }
 
@@ -102,7 +115,47 @@ function checkArrayEquality(array1 = [], array2 = []) {
 }
 
 function setProgress(element, value) {
-  element.style.background = `linear-gradient(to right, var(--color-light-gray) ${value}%, var(--color-block-border) ${value}%)`;
+  element.style.background = `linear-gradient(to right, var(--color-progress-bar) ${value}%, var(--color-block-border) ${value}%)`;
+}
+
+function createNotification(
+  { title, description },
+  notificationRoot,
+  timeout = 3
+) {
+  const notificationElement = document.createElement("div");
+  notificationElement.className = "notification container";
+  notificationElement.innerHTML = `
+    <button class="remove-button" active="false">
+      <img src="../assets/icons/xicon.svg" alt="share" draggable="false"/>
+    </button>
+    <span class="title">${title}</span>
+    <span class="description">${description}</span>
+  `;
+
+  const remove = () => {
+    notificationElement.setAttribute("active", false);
+    setTimeout(() => {
+      notificationRoot.removeChild(notificationElement);
+    }, 300);
+  };
+
+  setTimeout(remove, 1000 * timeout);
+  notificationElement.addEventListener("click", remove);
+
+  notificationRoot.appendChild(notificationElement);
+
+  setTimeout(() => {
+    notificationElement.setAttribute("active", true);
+  }, 100);
+
+  console.log(notificationRoot.children.length);
+  if (notificationRoot.children.length > 5) {
+    const children = notificationRoot.children;
+    for (let i = 0; i < notificationRoot.children.length - 5; i++) {
+      notificationRoot.removeChild(children[i]);
+    }
+  }
 }
 
 function createSongElement(songId) {
@@ -121,13 +174,40 @@ function createSongElement(songId) {
       <h3>${songObject.title}</h3>
       <p>${songObject.author}</p>
     </div>
+    <div class="interaction-buttons">
+      <button class="play-now-button">
+        <img src="../assets/icons/play_now.svg" alt="share" draggable="false"/>
+      </button>
+      <button class="add-to-queue-button">
+        <img src="../assets/icons/plus.svg" alt="share" draggable="false"/>
+      </button>
+    </div>
     <button class="share-button">
       <img src="../assets/icons/share.svg" alt="share" draggable="false" />
     </button>
   `;
 
-  songElement.addEventListener("click", () => {
+  const playNowButton = songElement.querySelector("button.play-now-button");
+  const addToQueueButton = songElement.querySelector(
+    "button.add-to-queue-button"
+  );
+  const shareButton = songElement.querySelector("button.share-button");
+
+  playNowButton.addEventListener("click", () => {
+    queue.playSong(songId);
+  });
+
+  addToQueueButton.addEventListener("click", () => {
     queue.push(songId);
+  });
+
+  shareButton.addEventListener("click", () => {
+    const shareUrl = getShareUrl(songId);
+    navigator.clipboard.writeText(shareUrl);
+    notificationManager.createNotification({
+      title: "Copiado!",
+      description: `Você copiou o link da música <b>${songObject.title}</b> para compartilhar com os seus amigos!`,
+    });
   });
 
   return songElement;
@@ -222,12 +302,39 @@ function getFromPercent(percent, total) {
   return (percent / 100) * total;
 }
 
+function switchDisable(elements = [], disable = false) {
+  elements.forEach((element) => {
+    const isDisabled = element.getAttribute("disabled");
+    if (disable && !isDisabled) {
+      element.setAttribute("disabled", disable);
+    } else if (!disable && isDisabled) {
+      element.removeAttribute("disabled");
+    }
+  });
+}
+
+function getShareUrl(songId) {
+  const newSearchParams = new URLSearchParams([["song", songId]]);
+  const baseURL = window.location.origin + window.location.pathname;
+  return [baseURL, newSearchParams].join("?");
+}
+
+function getSharedSong() {
+  const searchParams = new URLSearchParams(window.location.search);
+  return searchParams.get("song");
+}
+
 document.addEventListener("DOMContentLoaded", () => {
+  const sharedSong = getSharedSong();
+  const notificationRoot = document.getElementById("notifications");
   const audioController = document.getElementById("audio-controller");
   const progressBar = document.getElementById("progress-bar");
   const searchForm = document.getElementById("search-field");
   const musicIndicator = document.getElementById("music-indicator");
   const timeRootElement = document.getElementById("time");
+  const shareButton = document.querySelector(
+    "div#music-indicator button.share-button"
+  );
   const searchResultsTitle = document.querySelector(
     "div#search-results h2.title"
   );
@@ -253,6 +360,17 @@ document.addEventListener("DOMContentLoaded", () => {
   setTime(0, 0, timeRootElement);
 
   setProgress(progressBar, progressBar.value);
+
+  notificationManager.createNotification = (
+    { title, description },
+    timeout
+  ) => {
+    createNotification(
+      { title, description },
+      notificationRoot,
+      timeout ?? notificationManager.timeout
+    );
+  };
 
   progressBar.addEventListener("input", (e) => {
     const value = e.target.value;
@@ -351,7 +469,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   playButton.addEventListener("click", () => {
     if (audioController.ended) {
-      queue.pull();
+      if (queue.getSongs().length > 0) {
+        queue.pull();
+      } else {
+        audioController.currentTime = 0;
+      }
     } else if (audioController.paused) {
       audioController.play();
     } else {
@@ -373,6 +495,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  shareButton.addEventListener("click", () => {
+    const currentSongId = queue.getCurrent();
+    if (currentSongId !== undefined) {
+      const songObject = SONG_LIST[currentSongId];
+      const shareUrl = getShareUrl(currentSongId);
+      navigator.clipboard.writeText(shareUrl);
+      notificationManager.createNotification({
+        title: "Copiado!",
+        description: `Você copiou o link da música <b>${songObject.title}</b> para compartilhar com os seus amigos!`,
+      });
+    }
+  });
+
   setInterval(() => {
     if (!audioController.paused && audioController.currentSrc) {
       setTime(
@@ -385,11 +520,30 @@ document.addEventListener("DOMContentLoaded", () => {
         audioController.duration
       );
       setProgress(progressBar, progressBar.value);
-      if (musicIndicator.className === "") {
-        musicIndicator.className = "active-music";
-      }
-    } else {
-      musicIndicator.className = "";
     }
-  }, 1000);
+    switchDisable(
+      [
+        playButton,
+        nextButton,
+        previousButton,
+        volumeButton,
+        progressBar,
+        shareButton,
+      ],
+      !audioController.currentSrc
+    );
+
+    musicIndicator.className =
+      audioController.currentSrc && !audioController.ended
+        ? "active-music"
+        : "";
+  }, 500);
+
+  if (
+    sharedSong !== null &&
+    !isNaN(sharedSong) &&
+    Object.prototype.hasOwnProperty.call(SONG_LIST, sharedSong)
+  ) {
+    queue.push(sharedSong);
+  }
 });

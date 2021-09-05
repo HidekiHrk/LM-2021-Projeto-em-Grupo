@@ -15,6 +15,7 @@
   --color-block-bg: #1c0524;
   --color-block-border: rgba(255, 255, 255, 0.2);
   --color-bg: #120317;
+  --color-progress-bar: var(--color-light-gray);
   /* ------ */
 }
 
@@ -66,7 +67,7 @@ div.logo {
   display: flex;
   align-items: center;
   column-gap: 21px;
-  cursor:pointer;
+  cursor: pointer;
 }
 
 div.logo * {
@@ -239,7 +240,7 @@ div.song-item {
   width: calc(50% - 38px);
   overflow: hidden;
   flex-shrink: 0;
-  cursor: pointer;
+  /* cursor: pointer; */
 }
 
 div.song-item.queue-layout {
@@ -287,6 +288,49 @@ div.song-item button.share-button {
 div.song-item button.share-button img {
   height: 16px;
   width: auto;
+}
+
+div.song-item div.interaction-buttons {
+  position: absolute;
+  display: flex;
+  background-color: #0008;
+  width: 100%;
+  height: 100%;
+  column-gap: 20px;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+div.song-item:hover div.interaction-buttons {
+  opacity: 1;
+  pointer-events: all;
+  user-select: none;
+}
+
+div.song-item div.interaction-buttons * {
+  user-select: none;
+}
+
+div.song-item div.interaction-buttons button {
+  padding: 0;
+  cursor: pointer;
+  padding: 7px;
+  background: 0;
+  border: 0;
+  outline: 0;
+}
+
+div.song-item div.interaction-buttons button img {
+  width: 25px;
+  height: 25px;
+  filter: brightness(0.8);
+  transition: filter 0.3s ease;
+}
+
+div.song-item div.interaction-buttons button:hover img {
+  filter: brightness(1);
 }
 
 div.song-item.queue-layout button.remove-button {
@@ -337,7 +381,7 @@ div#music-indicator img.song-logo {
   width: 123px;
   object-fit: cover;
   border: 1px solid var(--color-light-purple);
-  background-color: var(--color-light-purple);
+  background-color: var(--color-block-bg);
 }
 
 div#music-indicator div.song-info {
@@ -372,6 +416,10 @@ div#music-indicator button.share-button {
   cursor: pointer;
 }
 
+div#music-indicator button.share-button:disabled {
+  display: none;
+}
+
 div#music-indicator button.share-button img {
   height: 20px;
   width: auto;
@@ -383,6 +431,10 @@ div#music-player-container {
   display: flex;
   flex-direction: column;
   padding: 24px 22px;
+}
+
+div#music-player-container * {
+  user-select: none;
 }
 
 div#music-player-container div.controls {
@@ -397,6 +449,11 @@ div#music-player-container div.controls button {
   border: none;
   background: none;
   cursor: pointer;
+}
+
+div#music-player-container div.controls button:disabled {
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 div#music-player-container div.controls button#previous-button {
@@ -467,9 +524,18 @@ div#music-player-container
   div.controls
   button#volume-button
   div.volume-controller
+  input[type="range"]:hover {
+  --color-progress-bar: var(--color-purple);
+}
+
+div#music-player-container
+  div.controls
+  button#volume-button
+  div.volume-controller
   input[type="range"] {
   /* transform: rotate(270deg); */
   width: 90px;
+  height: 6px;
   border-radius: 5px;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -491,7 +557,7 @@ div#music-player-container
   height: 6px;
   width: 6px;
   background-color: var(--color-light-gray);
-  border-radius: 5px;
+  border-radius: 50%;
 }
 
 div#music-player-container
@@ -505,10 +571,19 @@ div#music-player-container
   width: 6px;
   background-color: var(--color-light-gray);
   border: none;
-  border-radius: 5px;
+  border-radius: 50%;
 }
 
-div#time {
+div#music-player-container
+  div.controls
+  button#volume-button
+  div.volume-controller
+  input[type="range"]:hover::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+}
+
+div#music-player-container div#time {
   display: flex;
   justify-content: space-between;
 }
@@ -519,6 +594,10 @@ div#time span {
   font-weight: 400;
   line-height: 14px;
   color: var(--color-light-gray);
+}
+
+input#progress-bar:hover {
+  --color-progress-bar: var(--color-purple);
 }
 
 input#progress-bar {
@@ -542,7 +621,7 @@ input#progress-bar::-webkit-slider-thumb {
   height: 6px;
   width: 6px;
   background-color: var(--color-light-gray);
-  border-radius: 5px;
+  border-radius: 0 50% 50% 0;
 }
 
 input#progress-bar::-moz-range-thumb {
@@ -552,11 +631,84 @@ input#progress-bar::-moz-range-thumb {
   width: 6px;
   background-color: var(--color-light-gray);
   border: none;
-  border-radius: 5px;
+  border-radius: 0 50% 50% 0;
+}
+
+input#progress-bar:hover::-webkit-slider-thumb {
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
+}
+
+input#progress-bar:hover::-moz-range-thumb {
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
 }
 
 audio#audio-controller {
   display: none;
+}
+
+div#notifications {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  width: 300px;
+  padding: 15px 15px;
+  row-gap: 10px;
+  top: 0;
+  right: 0;
+  z-index: 10;
+}
+
+div#notifications div.notification {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  row-gap: 5px;
+  padding: 10px 20px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+div#notifications div.notification[active="true"] {
+  opacity: 1;
+}
+
+div#notifications div.notification * {
+  user-select: none;
+}
+
+div#notifications div.notification button.remove-button {
+  position: absolute;
+  display: flex;
+  top: 15px;
+  right: 10px;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: none;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+div#notifications div.notification button.remove-button img {
+  height: 10px;
+  width: 10px;
+}
+
+div#notifications div.notification span.title {
+  font-size: 14px;
+  color: var(--color-light-gray);
+}
+
+div#notifications div.notification span.description {
+  font-size: 12px;
+  color: var(--color-dark-gray);
 }
 
 /* Breakpoint laptop */
@@ -659,6 +811,10 @@ audio#audio-controller {
 
 /* Breakpoint mobile */
 @media screen and (max-width: 827px) {
+  div.song-item {
+    width: 100%;
+  }
+
   div.navbar {
     grid-template-columns: 17.5fr 37.6fr 10.2fr;
   }
@@ -686,6 +842,10 @@ audio#audio-controller {
 
 /* Breakpoint mobile 2 */
 @media screen and (max-width: 700px) {
+  div#notifications {
+    width: 100%;
+  }
+
   div#main-div {
     margin-bottom: 215px;
     height: 100%;
@@ -694,6 +854,7 @@ audio#audio-controller {
 
   div.item-list-container {
     flex-wrap: wrap;
+    padding-right: 0;
   }
 
   div.navbar {
@@ -737,10 +898,6 @@ audio#audio-controller {
     display: flex;
     flex-direction: column;
     height: 100%;
-  }
-
-  div.song-item {
-    width: 100%;
   }
 
   div#search-results {
