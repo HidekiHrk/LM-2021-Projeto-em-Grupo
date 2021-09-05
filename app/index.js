@@ -43,7 +43,7 @@ const RENDER_CACHE = {
 
 const notificationManager = {
   createNotification: ({ title, description }, timeout) => {},
-  timeout: 3,
+  timeout: 10,
 };
 
 class SongManager {
@@ -185,8 +185,15 @@ function checkArrayEquality(array1 = [], array2 = []) {
   return true;
 }
 
-function setProgress(element, value) {
+function setProgress(element, value, startCorrect = false) {
   element.style.background = `linear-gradient(to right, var(--color-progress-bar) ${value}%, var(--color-block-border) ${value}%)`;
+  if (startCorrect) {
+    if (parseInt(value) < 1) {
+      element.classList.add("start-correction");
+    } else {
+      element.classList.remove("start-correction");
+    }
+  }
 }
 
 function createNotification(
@@ -444,7 +451,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   setTime(0, 0, timeRootElement);
 
-  setProgress(progressBar, progressBar.value);
+  setProgress(progressBar, progressBar.value, true);
 
   notificationManager.createNotification = (
     { title, description },
@@ -459,7 +466,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   progressBar.addEventListener("input", (e) => {
     const value = e.target.value;
-    setProgress(e.target, value);
+    setProgress(e.target, value, true);
+
     if (audioController.currentSrc) {
       audioController.currentTime = getFromPercent(
         parseFloat(value),
@@ -608,7 +616,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       progressBar.value = !isNaN(audioController.duration)
         ? getPercent(audioController.currentTime, audioController?.duration)
         : 0;
-      setProgress(progressBar, progressBar.value);
+      setProgress(progressBar, progressBar.value, true);
     }
     switchDisable(
       [

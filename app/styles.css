@@ -646,6 +646,14 @@ input#progress-bar:hover::-moz-range-thumb {
   border-radius: 50%;
 }
 
+input#progress-bar.start-correction::-webkit-slider-thumb {
+  border-radius: 50%;
+}
+
+input#progress-bar.start-correction::-moz-range-thumb {
+  border-radius: 50%;
+}
+
 audio#audio-controller {
   display: none;
 }
@@ -828,6 +836,14 @@ div#notifications div.notification span.description {
     right: calc(100% + 10px);
   }
 
+  div#music-player-container
+    div.controls
+    button#volume-button
+    div.volume-controller::after {
+    left: unset !important;
+    right: -10px;
+  }
+
   div.content-grid {
     grid-template-columns: 17.5fr 20.6fr 27.2fr;
     grid-template-rows: 1fr 123px;
@@ -841,7 +857,7 @@ div#notifications div.notification span.description {
 }
 
 /* Breakpoint mobile 2 */
-@media screen and (max-width: 700px) {
+@media screen and (max-width: 710px) {
   div#notifications {
     width: 100%;
   }
@@ -854,7 +870,6 @@ div#notifications div.notification span.description {
 
   div.item-list-container {
     flex-wrap: wrap;
-    padding-right: 0;
   }
 
   div.navbar {
