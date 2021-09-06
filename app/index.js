@@ -402,6 +402,16 @@ function getSharedSong() {
   return searchParams.get("song");
 }
 
+function configureModal(toggle, closeButton, modalElement) {
+  toggle.addEventListener("click", () => {
+    modalElement.classList.add("modal-visible");
+  });
+
+  closeButton.addEventListener("click", () => {
+    modalElement.classList.remove("modal-visible");
+  });
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   const sharedSong = getSharedSong();
   const notificationRoot = document.getElementById("notifications");
@@ -410,6 +420,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   const searchForm = document.getElementById("search-field");
   const musicIndicator = document.getElementById("music-indicator");
   const timeRootElement = document.getElementById("time");
+  const creditModal = document.getElementById("credit-modal");
+  const creditModalToggler = document.getElementById("credit-modal-toggler");
+  const creditModalCloseButton = document.querySelector(
+    "div#credit-modal div.modal-body button.remove-button"
+  );
   const shareButton = document.querySelector(
     "div#music-indicator button.share-button"
   );
@@ -443,6 +458,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     ],
     true
   );
+
+  configureModal(creditModalToggler, creditModalCloseButton, creditModal);
 
   await songManager.fetchSongsFromCdn();
 

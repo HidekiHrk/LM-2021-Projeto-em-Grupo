@@ -9,6 +9,24 @@
   <link rel="shortcut icon" href="../assets/icons/favicon.png" type="image/x-icon">
 </head>
 <body>
+  <div id="credit-modal">
+    <div class="modal-body container">
+      <button class="remove-button" active="false">
+        <img src="../assets/icons/xicon.svg" alt="share" draggable="false"/>
+      </button>
+      <h2 class="title">CRÉDITOS</h2>
+      <p>
+        <b>Desenvolvedores:</b>
+        <br/>- Paulo Guilherme - Landing Page;
+        <br/>- Rayan Santos - Página da aplicação;
+        <br/>- Geraldo - Página de Créditos;
+      </p>
+      <p>
+        <b>Créditos especiais:</b>
+        <br/>- <a href="https://ncs.io/">NCS</a> - Músicas e thumbnails;
+      </p>
+    </div>
+  </div>
   <div id="notifications"></div>
   <div id="main-div">
     <div class="navbar">
@@ -29,8 +47,7 @@
           </button>
           <ul id="menu-body" class="container">
             <li onclick="window.open('https://github.com/HidekiHrk/LM-2021-SoundCave')">GitHub</li>
-            <li>Créditos</li>
-
+            <li id="credit-modal-toggler">Créditos</li>
           </ul>
         </div>
       </div>
