@@ -3,7 +3,6 @@
   font-family: "Roboto", sans-serif;
   margin: 0;
   padding: 0;
-  box-sizing: unset;
 }
 
 header {
@@ -43,53 +42,14 @@ header #inicio {
 header #inicio h1 {
   text-transform: uppercase;
 }
-   #loginimg {
-   width: 40px;
-   height: 40px;
-   border: none;
-   background: transparent;
-   outline: 0;
-   cursor: pointer;
- }
+
 header nav ul a {
   grid-row: 1/2;
   grid-column: 2/3;
   text-decoration: none;
   color: white;
   text-transform: uppercase;
-} 
-   #forget-a,#forget-modal,#register-modal, #register-a {
-    margin-top: 2px;
-    border: none;
-    font-size: initial;
-    padding: unset;
-   }
-    div.modal-content {
-      text-transform: capitalize;
-      background-color: #1c0524;
-      color: white;
-      border-color: #120317;
-    }
-   #btnlogin {
-   position: absolute;
-   top: 5%;
-   right: -20px;
-   transform: translate(-50%, -39%);
-   -ms-transform: translate(-60%, -60%);
-   color: white;
-   padding: 12px 24px;
-   border: none;
-   border-radius: 5px;
-   text-transform: uppercase;
-  }
-  
-    #modallog {
-      pointer-events: none;
-    }
-
-   #modal-footer{
-    text-align: left;
-   }
+}
 
 header nav ul {
   display: flex;
